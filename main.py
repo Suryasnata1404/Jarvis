@@ -2,11 +2,13 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import musicLibrary
+import requests
 
 # pip install pocketsphinx
 
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
+newsapi = "b0966f0c4701473980f0b5f6b1c5bdb9"
 
 def speak(text):
     engine.say(text)
@@ -24,7 +26,23 @@ def processCommand(c):
     elif c.lower().startswith("play"):
         song = c.lower().split(" ")[1]
         link = musicLibrary.music[song]  
-        webbrowser.open(link) 
+        webbrowser.open(link)
+
+    elif "news" in c.lower():
+        r = requests.get(f"https://newsapi.org/v2/top-headlines?country=us&apiKey={newsapi}")
+        if r.status_code == 200:
+            # Parse the JSON response
+            data = r.json()
+            
+            # Extract the articles
+            articles = data.get("articles", [])
+
+            # Print the headlines
+            print("Top headlines:\n")
+            for article in articles:
+                speak(article['title'])
+        else:
+            print("Failed to fetch headlines:", r.status_code)
 
 if __name__ == "__main__":
       speak("Initializing Jarvis.....")
